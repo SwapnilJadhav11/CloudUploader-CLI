@@ -5,3 +5,8 @@ if [ $# -eq 0 ]; then
 fi
 
 FILE_PATH="$1"
+
+if [ ! -f "$FILE_PATH" ]; then
+    echo "Error: File not found at $FILE_PATH"
+    exit 1
+fi
