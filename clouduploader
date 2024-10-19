@@ -31,9 +31,8 @@ else
 fi
 
 echo "Uploading $FILE_NAME to S3..."
-if aws s3 cp "$FILE_PATH" "s3://$BUCKET_NAME/$FILE_NAME"; then
-    echo "Successfully uploaded $FILE_NAME to S3"
+if command -v pv > /dev/null; then
+    pv "$FILE_PATH" | aws s3 cp - "s3://$BUCKET_NAME/$FILE_NAME"
 else
-    echo "Error: Failed to upload $FILE_NAME to S3"
-    exit 1
+    aws s3 cp "$FILE_PATH" "s3://$BUCKET_NAME/$FILE_NAME"
 fi
