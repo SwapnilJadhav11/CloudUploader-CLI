@@ -36,3 +36,6 @@ if command -v pv > /dev/null; then
 else
     aws s3 cp "$FILE_PATH" "s3://$BUCKET_NAME/$FILE_NAME"
 fi
+
+LINK=$(aws s3 presign "s3://$BUCKET_NAME/$FILE_NAME" --expires-in 604800)
+echo "Shareable link (valid for 7 days): $LINK"
