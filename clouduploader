@@ -29,3 +29,11 @@ else
     echo "DEBUG: File does not exist in S3 or there was an error listing it"
     echo "DEBUG: AWS command exit code: $?"
 fi
+
+echo "Uploading $FILE_NAME to S3..."
+if aws s3 cp "$FILE_PATH" "s3://$BUCKET_NAME/$FILE_NAME"; then
+    echo "Successfully uploaded $FILE_NAME to S3"
+else
+    echo "Error: Failed to upload $FILE_NAME to S3"
+    exit 1
+fi
