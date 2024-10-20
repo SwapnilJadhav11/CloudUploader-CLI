@@ -1,0 +1,41 @@
+#!/bin/bash
+if [ $# -eq 0 ]; then
+    echo "Usage: clouduploader <file_path>"
+    exit 1
+fi
+
+FILE_PATH="$1"
+BUCKET_NAME="myclouduploaderbucket"
+
+aws s3 cp "$FILE_PATH" "s3://$BUCKET_NAME/"
+
+if [ ! -f "$FILE_PATH" ]; then
+    echo "Error: File not found at $FILE_PATH"
+    exit 1
+fi
+
+BUCKET_NAME="myclouduploaderbucket"
+FILE_NAME=$(basename "$FILE_PATH")
+
+echo "DEBUG: Attempting to list file in S3..."
+if aws s3 ls "s3://$BUCKET_NAME/$FILE_NAME"; then
+    echo "DEBUG: File exists in S3"
+    read -p "File already exists in S3. Overwrite? (y/n): " OVERWRITE
+    if [ "$OVERWRITE" != "y" ]; then
+        echo "Upload cancelled."
+        exit 0
+    fi
+else
+    echo "DEBUG: File does not exist in S3 or there was an error listing it"
+    echo "DEBUG: AWS command exit code: $?"
+fi
+
+echo "Uploading $FILE_NAME to S3..."
+if command -v pv > /dev/null; then
+    pv "$FILE_PATH" | aws s3 cp - "s3://$BUCKET_NAME/$FILE_NAME"
+else
+    aws s3 cp "$FILE_PATH" "s3://$BUCKET_NAME/$FILE_NAME"
+fi
+
+LINK=$(aws s3 presign "s3://$BUCKET_NAME/$FILE_NAME" --expires-in 604800)
+echo "Shareable link (valid for 7 days): $LINK"
